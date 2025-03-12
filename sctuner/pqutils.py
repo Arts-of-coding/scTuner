@@ -5,26 +5,20 @@ from tqdm import tqdm
 import math
 import torch
 from torch.optim import Optimizer
-
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Normal
-torch.manual_seed(42)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from sctuner.optimisers import AdEMAMix
 import numpy as np
-
 import random
 import os
 import anndata as ad
 import time
-
-#import os
-import polars as pl
 import polars.selectors as cs
 import glob
 import shutil
+torch.manual_seed(42)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def pqsplitter(dirs: list, feature_file_path: str, batch_size: int = 50000, suffix: str = "scanpy_hvg_out/scanpy_hvg_object.h5ad",outputdir: str = "sctuner_output/data/"):
@@ -184,3 +178,64 @@ def pqmerger(outputdir: str = "sctuner_output/data/"):
 
     # Remove temporary splits if join is succesfull
     shutil.rmtree(f'{outputdir}joined_dataset_raw/')
+
+
+def parquet2anndata(parquet_path: str, embeddings_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", outputfile_path: str = "adata_raw_embeddings.h5ad", write_output: bool = True):
+    ''' 
+    device: choices in "cpu" (default) or "gpu" (cuda). If there is enough VRAM and the dataset is small enough suggest to use "gpu". If there is a good amount of RAM "cpu" should be selected.
+    '''
+
+    cells = pl.scan_parquet(parquet_path)
+    cells.collect_schema()
+
+    match device:
+        case "gpu":
+            gpu_engine = pl.GPUEngine(
+                device=0, # This is the default
+                raise_on_fail=False,
+                parquet_options={
+                    'chunked': True,
+                    'chunk_read_limit': int(1e2),
+                    'pass_read_limit': int(4e9)
+                } # Fail loudly if we can't run on the GPU.
+            )
+
+            result = (cells.collect(engine=gpu_engine)) # add gpu engine here!
+
+        case "cpu":
+            result = (cells.collect())
+
+
+    dict_columns = {}
+
+    for _ in metadata_columns:
+        dict_columns[_] = result[_]
+
+    result = result.drop(metadata_columns)
+
+    cols = result.columns
+    merged_numpy = result.to_numpy()
+
+    del result
+
+    adata = sc.AnnData(merged_numpy)
+    del merged_numpy
+
+    for _ in metadata_columns:
+        adata.obs[_] = dict_columns[_]
+
+    adata.var.index = cols
+
+    # Load in embeddings
+    print("Adding embeddings")
+    embeddings = np.load(embeddings_path)
+
+    for i, z in enumerate(embeddings.T): # remove .cpu() if on cpu
+        adata.obs[f"Z_{i}"] = z
+
+    # Write h5ad with embeddings attached
+    if write_output is True:
+        print("Write h5ad object")
+        sc.write(outputfile_path,adata)
+
+    return adata, embeddings
