@@ -246,7 +246,7 @@ class Parquetpipe:
         self.feature_file_path = feature_file_path
         self.outputdir = outputdir
 
-    def setup_parquet(self): # Can add configurable gpu_engine as well as possible second argument
+    def setup_parquet_pipe(self): # Can add configurable gpu_engine as well as possible second argument
         pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir)
         pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir)
         pqmerger(outputdir = self.outputdir)
