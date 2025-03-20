@@ -64,7 +64,7 @@ def pqsplitter(dirs: list, feature_file_path: str, batch_size: int = 50000, suff
         del adata
 
 
-def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100, outputdir: str = "sctuner_output/data/"):
+def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100, outputdir: str = "sctuner_output/data/", dtype_raw: str = "UInt16"):
     ''' This function converts parquet files from pandas to polars and performs log1p normalisation on the individual parquet files (GPU-accelerated). '''
     # Define the gpu_engine
     gpu_engine = pl.GPUEngine(
@@ -89,6 +89,17 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
 
     print(len(features))
 
+    # Remove any old directories if present
+    try:
+        shutil.rmtree(f'{outputdir}joined_dataset_raw/')
+    except FileNotFoundError:
+        pass
+
+    try:
+        shutil.rmtree(f'{outputdir}joined_dataset/')
+    except FileNotFoundError:
+        pass
+
     for num, i in enumerate(dirs):
 
         for _ in tqdm(range(0, len(glob.glob(f'{outputdir}dataset_{num}*.parquet')))):
@@ -99,8 +110,14 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
             for i in features:
                 if i not in df.columns:
                     df = df.with_columns(pl.lit(0).alias(i))
-                    
-            df = df.cast({cs.numeric(): pl.UInt16})
+            
+            # Matches the datatype to the dtype U32 for datasets with large values
+            match dtype_raw:
+                case "UInt16":
+                    df = df.cast({cs.numeric(): pl.UInt16})
+                case "UInt32":
+                    df = df.cast({cs.numeric(): pl.UInt32})
+
             df.with_columns(pl.col('ID').cast(pl.String))
             df.with_columns(pl.col('sctuner_batch').cast(pl.String))
 
@@ -110,6 +127,7 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
             df = df.select(schema_order)
             print(df.shape)
 
+            # Write raw parquet files batch wise
             df.write_parquet(f'{outputdir}/joined_dataset_raw', **kwargs)
 
             # Scale with log1p beforehand for faster training!
@@ -140,6 +158,7 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
             df = df.with_columns(IDs_result_datasets)
             print(df.head(3))
 
+            # Write log1p transformed parquet files batch wise
             df.write_parquet(f'{outputdir}/joined_dataset', **kwargs)
             del df
 
@@ -245,10 +264,12 @@ class Parquetpipe:
         self.dirs = dirs
         self.feature_file_path = feature_file_path
         self.outputdir = outputdir
+        #for key, value in kwargs.items():
+        #    setattr(self, key, value)
 
-    def setup_parquet_pipe(self): # Can add configurable gpu_engine as well as possible second argument
+    def setup_parquet_pipe(self, **kwargs): # Can add configurable gpu_engine as well as possible second argument
         pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir)
-        pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir)
+        pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **kwargs)
         pqmerger(outputdir = self.outputdir)
 
         return
