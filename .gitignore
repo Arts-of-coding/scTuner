@@ -1,5 +1,8 @@
 *.ipynb
 batchmergersctuner.py
+scalescbatchhvgfunction.py
+batchsplitterctuner.py
+importparquet.py
 *.h5ad
 *.npy
 *.pt

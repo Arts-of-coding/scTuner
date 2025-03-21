@@ -32,8 +32,9 @@ def timeit(f):
 # Can also load in multiple anndata objects; but loses all obs? and makes an inner join; important!
 # Concatenate and calculate HVGs for each batch
 import os 
-main_dir = "/mnt/d/Radboud/data/python/jupyter_notebooks/drvi_pbmc/"
-
+# main_dir = "/mnt/d/Radboud/data/python/jupyter_notebooks/singleron_scobjects/"
+# main_dir = "/mnt/d/Radboud/data/python/jupyter_notebooks/drvi_pbmc/"
+main_dir = "/mnt/d/Radboud/data/python/jupyter_notebooks/1mln_batches/"
 subfolders = [ f'{main_dir}{f.name}/' for f in os.scandir(main_dir) if f.is_dir() ]
 data_dir_list = subfolders
 

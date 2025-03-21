@@ -21,7 +21,7 @@ def setup_parquet(parquet_path: str, metadata_columns: list = ["ID","sctuner_bat
     device: choices in "cpu" (default) or "gpu" (cuda). If there is enough VRAM and the dataset is small enough suggest to use "gpu". If there is a good amount of RAM "cpu" should be selected.
     '''
 
-    cells = pl.scan_parquet(parquet_path)
+    cells = pl.scan_parquet(parquet_path, low_memory=True) #
     cells.collect_schema()
 
     match device:
@@ -39,12 +39,19 @@ def setup_parquet(parquet_path: str, metadata_columns: list = ["ID","sctuner_bat
             result = (cells.collect(engine=gpu_engine)) # add gpu engine here!
 
         case "cpu":
-            result = (cells.collect())
+            result = (cells.collect()) #
+            #result = pl.read_parquet(parquet_path, streaming=True) # add gpu engine here!
 
     result = result.drop(metadata_columns)
+
+    
+    #result.write_parquet(f'test_polars_streaming.parquet', use_pyarrow= True)
     print(result.head(3))
 
     # Perhaps save the list for the exact genes (or can use the earier)
+    # test scaling first?
+    #result = result.select((pl.all()-pl.all().min())/pl.all().max()-pl.all().min())
+    #print("scaling succesull")
 
     # Directly convert parquet to torch input
     result = result.to_torch()

@@ -164,19 +164,20 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
             del df
 
 
-def pqmerger(outputdir: str = "sctuner_output/data/", **kwargs_polars):
+def pqmerger(outputdir: str = "sctuner_output/data/"): #, **kwargs_polars
     ''' This function joins the raw count parquet files and the log1p normalised ones into a single object (CPU). '''
+
     # non-raw joined
-    cells = pl.scan_parquet(f'{outputdir}joined_dataset/', **kwargs_polars)
+    cells = pl.scan_parquet(f'{outputdir}joined_dataset/', low_memory=True) # ,**kwargs_polars
     cells.collect_schema()
 
     result = (cells.collect())
-
+    print(result.shape)
     result = result.sample(n=len(result), seed=42,shuffle=True)
 
     print(result.shape)
     print(result.head(5))
-    result.write_parquet(f'{outputdir}joined_dataset.parquet')
+    result.write_parquet(f'{outputdir}joined_dataset.parquet', use_pyarrow=True)
     del cells
     del result
 
@@ -184,11 +185,11 @@ def pqmerger(outputdir: str = "sctuner_output/data/", **kwargs_polars):
     shutil.rmtree(f'{outputdir}joined_dataset/')
 
     # raw joined
-    cells = pl.scan_parquet(f'{outputdir}joined_dataset_raw/')
+    cells = pl.scan_parquet(f'{outputdir}joined_dataset_raw/', low_memory=True)
     cells.collect_schema()
 
     result = (cells.collect())
-
+    print(result.shape)
     result = result.sample(n=len(result), seed=42,shuffle=True)
     
     print(result.shape)
@@ -198,6 +199,8 @@ def pqmerger(outputdir: str = "sctuner_output/data/", **kwargs_polars):
 
     # Remove temporary splits if join is succesfull
     shutil.rmtree(f'{outputdir}joined_dataset_raw/')
+    del result
+    del cells
 
 
 def parquet2anndata(parquet_path: str, embeddings_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", outputfile_path: str = "adata_raw_embeddings.h5ad", write_output: bool = True, **kwargs_polars):
@@ -271,13 +274,13 @@ class Parquetpipe:
     def setup_parquet_pipe(self, *args): # Can add configurable gpu_engine as well as possible second argument
         splitter_params = args[0]
         converter_params = args[1]
-        merger_params = args[2]
+        #merger_params = args[2]
         self.__dict__.update(**splitter_params)
         self.__dict__.update(**converter_params)
-        self.__dict__.update(**merger_params)
+        #self.__dict__.update(**merger_params)
 
         pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **splitter_params)
         pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **converter_params)
-        pqmerger(outputdir = self.outputdir, **merger_params)
+        #pqmerger(outputdir = self.outputdir) #, **merger_params
 
         return

@@ -11,7 +11,7 @@ import os
 import anndata as ad
 import time
 
-def hvg_batch_processing(dirs: list,top_batch_hvg: int = 2000, preliminary_filtering: bool = True):
+def hvg_batch_processing(dirs: list,top_batch_hvg: int = 1500, preliminary_filtering: bool = True):
     ''' Put function arguments here'''
     # calculate hvg for each batch
     for _ in tqdm(dirs):
