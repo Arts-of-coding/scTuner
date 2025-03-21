@@ -17,6 +17,7 @@ import time
 import polars.selectors as cs
 import glob
 import shutil
+from memory_profiler import profile
 torch.manual_seed(42)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -163,10 +164,10 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
             del df
 
 
-def pqmerger(outputdir: str = "sctuner_output/data/"):
+def pqmerger(outputdir: str = "sctuner_output/data/", **kwargs_polars):
     ''' This function joins the raw count parquet files and the log1p normalised ones into a single object (CPU). '''
     # non-raw joined
-    cells = pl.scan_parquet(f'{outputdir}joined_dataset/')
+    cells = pl.scan_parquet(f'{outputdir}joined_dataset/', **kwargs_polars)
     cells.collect_schema()
 
     result = (cells.collect())
@@ -199,12 +200,12 @@ def pqmerger(outputdir: str = "sctuner_output/data/"):
     shutil.rmtree(f'{outputdir}joined_dataset_raw/')
 
 
-def parquet2anndata(parquet_path: str, embeddings_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", outputfile_path: str = "adata_raw_embeddings.h5ad", write_output: bool = True):
+def parquet2anndata(parquet_path: str, embeddings_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", outputfile_path: str = "adata_raw_embeddings.h5ad", write_output: bool = True, **kwargs_polars):
     ''' 
     device: choices in "cpu" (default) or "gpu" (cuda). If there is enough VRAM and the dataset is small enough suggest to use "gpu". If there is a good amount of RAM "cpu" should be selected.
     '''
 
-    cells = pl.scan_parquet(parquet_path)
+    cells = pl.scan_parquet(parquet_path, **kwargs_polars)
     cells.collect_schema()
 
     match device:
@@ -266,10 +267,17 @@ class Parquetpipe:
         self.outputdir = outputdir
         #for key, value in kwargs.items():
         #    setattr(self, key, value)
+    @profile
+    def setup_parquet_pipe(self, *args): # Can add configurable gpu_engine as well as possible second argument
+        splitter_params = args[0]
+        converter_params = args[1]
+        merger_params = args[2]
+        self.__dict__.update(**splitter_params)
+        self.__dict__.update(**converter_params)
+        self.__dict__.update(**merger_params)
 
-    def setup_parquet_pipe(self, **kwargs): # Can add configurable gpu_engine as well as possible second argument
-        pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir)
-        pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **kwargs)
-        pqmerger(outputdir = self.outputdir)
+        pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **splitter_params)
+        pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **converter_params)
+        pqmerger(outputdir = self.outputdir, **merger_params)
 
         return

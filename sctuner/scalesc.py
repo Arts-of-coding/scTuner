@@ -34,7 +34,7 @@ def hvg_batch_processing(dirs: list,top_batch_hvg: int = 2000, preliminary_filte
 
         # hvg
         scalesc.highly_variable_genes(n_top_genes=top_batch_hvg) # Can do batch key here and just select + save afterwards...
-        list_hvgs = scalesc.adata.var[scalesc.adata.var['highly_variable'] is True]
+        list_hvgs = scalesc.adata.var[scalesc.adata.var['highly_variable'] == True]
         list_hvgs
 
         # Save features
@@ -76,14 +76,14 @@ def extract_hvg_h5ad(dirs: list, feature_file_path: str, join: str = "outer"):
                     res=list(set(res).union(features))
                 else:
                     res = features
-            
-    print("Joining on HVGs: ",len(res))
-
+        
     res = random.sample(res, len(res))
 
     # Write features as separate list into original data_dir
     with open(feature_file_path, "w") as output:
         output.write(str(res))
+        
+    print("Joining on HVGs: ",len(res))
 
     for _ in tqdm(dirs):
 
