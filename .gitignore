@@ -8,7 +8,6 @@ importparquet.py
 *.pt
 *.dat
 *.ipynb
-*.png
 sctuner_output*
 __pycache__
 dist*
