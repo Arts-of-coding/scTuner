@@ -5,4 +5,4 @@ A repository to easily use single cell models (such as VAEs) constructed from la
 This repository contains its own VAE (constructed with PyTorch). Currently the AdEMAMix Optimiser is implemented from https://arxiv.org/abs/2409.03137.
 
 ## Benchmarking training time against state-of-the-art (scVI) integration with scTuner's VAE
-![clustering_plot](imgs/training_benchmark.png)
+![clustering_plot](img/training_benchmark.png)
