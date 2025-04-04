@@ -11,3 +11,5 @@ importparquet.py
 *.png
 sctuner_output*
 __pycache__
+dist*
+sctuner.egg-info*

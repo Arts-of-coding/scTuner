@@ -5,7 +5,7 @@ import pandas as pd
 import importlib
 import scalesc as ssc
 from tqdm import tqdm
-from memory_profiler import profile
+#from memory_profiler import profile
 import random
 import os
 import anndata as ad

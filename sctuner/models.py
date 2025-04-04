@@ -5,15 +5,12 @@ from tqdm import tqdm
 import math
 import torch
 from torch.optim import Optimizer
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Normal
 from sctuner.optimisers import AdEMAMix
 import numpy as np
 from sctuner.vae import VAE, loss_function, train
-from torch.utils.data import DataLoader
-import torch
 
 # Inside model.SCVI.setup_anndata
 def setup_parquet(parquet_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu"):
