@@ -65,7 +65,7 @@ def pqsplitter(dirs: list, feature_file_path: str, batch_size: int = 50000, suff
         del adata
 
 
-def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100, outputdir: str = "sctuner_output/data/", dtype_raw: str = "UInt16"):
+def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100, outputdir: str = "sctuner_output/data/", dtype_raw: str = "UInt16", device: str = "gpu"):
     ''' This function converts parquet files from pandas to polars and performs log1p normalisation on the individual parquet files (GPU-accelerated). '''
     # Define the gpu_engine
     gpu_engine = pl.GPUEngine(
@@ -101,11 +101,32 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
     except FileNotFoundError:
         pass
 
+    # Define polars engine based on gpu availability
+    match device:
+        case "gpu":
+            try: 
+                gpu_engine = pl.GPUEngine(
+                    device=0, # This is the default
+                    raise_on_fail=True,
+                    parquet_options={
+                        'chunked': True,
+                        'chunk_read_limit': int(1e2),
+                        'pass_read_limit': int(4e9)
+                    } # Fail loudly if we can't run on the GPU.
+                )
+                engine_polars = gpu_engine
+            except RuntimeError:
+                print("GPU not available, using CPU instead.")
+                engine_polars = "auto"
+
+        case "cpu":
+            engine_polars = "auto"
+
     for num, i in enumerate(dirs):
 
         for _ in tqdm(range(0, len(glob.glob(f'{outputdir}dataset_{num}*.parquet')))):
             file = f"{outputdir}dataset_{num}_split_{_}.parquet"
-            df = pl.scan_parquet(file).collect(engine=gpu_engine)
+            df = pl.scan_parquet(file).collect(engine=engine_polars)
 
             # Cast missing colums for correct schema
             for i in features:

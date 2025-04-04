@@ -1,8 +1,10 @@
 [build-system]
 requires = [
-    "setuptools @ git+https://github.com/wheelnext/setuptools.git@pep_771",
+    "setuptools @ git+https://github.com/wheelnext/setuptools.git@pep_771","hatchling>=1.5.0"
 ]
-build-backend = "setuptools.build_meta"
+#build-backend = "setuptools.build_meta"
+#requires = []
+build-backend = "hatchling.build"
 
 [tool.setuptools.packages.find]
 exclude = ["*"]
@@ -41,7 +43,7 @@ url = "https://download.pytorch.org/whl/cpu"
 [[tool.uv.index]]
 name = "pytorch-cu126"
 url = "https://download.pytorch.org/whl/cu126"
-explicit = true
+#explicit = true
 
 [[tool.uv.index]]
 name = "polars-gpu"
@@ -54,3 +56,6 @@ conflicts = [
     { extra = "gpu" },
   ],
 ]
+
+[tool.hatch.version]
+path = "sctuner/__init__.py"
