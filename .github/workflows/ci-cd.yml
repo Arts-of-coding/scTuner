@@ -36,16 +36,23 @@ jobs:
       run: pip install ruff
       
     # Run the ruff linter and ignore the import package error E402 for clust.py
-    - name: Run Ruff linter clust.py
-      run: ruff check opticlust/clust.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
+    - name: Run Ruff linter models.py
+      run: ruff check src/sctuner/models.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
 
     # Run the ruff linter and ignore the import package error E402 for tree.py
-    - name: Run Ruff linter tree.py
-      run: ruff check opticlust/tree.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
+    - name: Run Ruff linter optimisers.py
+      run: ruff check src/sctuner/optimisers.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
+
+    # Run the ruff linter and ignore the import package error E402 for tree.py
+    - name: Run Ruff linter pqutils.py
+      run: ruff check src/sctuner/pqutils.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
+
+    - name: Run Ruff linter scalesc.py
+      run: ruff check src/sctuner/scalesc.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
     
     # Run the ruff linter and ignore the import package error E402 for recommend.py
-    - name: Run Ruff linter recommend.py
-      run: ruff check opticlust/recommend.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
+    - name: Run Ruff linter vae.py
+      run: ruff check src/sctuner/vae.py --line-length 88 --extend-select C4,SIM,TCH,E4,E7,E9,F --ignore E402
       
   ci:
     needs: Ruff_linter
@@ -83,11 +90,11 @@ jobs:
 
    # Pip install uv and hatch in venv
     - name: Install dist and test packages
-      run: pip install uv hatch pytest black isort
+      run: pip install uv hatch pytest black isort memory-profiler
 
     # Builds a wheel needed for the CD part
     - name: Build wheel of package
-      run: hatch build -t wheel
+      run: uv build
       
     - name: Creating needed directories
       run: mkdir -p dist_artifacts
@@ -103,7 +110,7 @@ jobs:
 
     # Test if the created wheel file can be installed
     - name: Install wheel of package into venv with uv for speed
-      run: uv pip install --system dist/*.whl --force-reinstall
+      run: uv pip install sctuner[cpu] --system dist/*.whl --force-reinstall --no-cache
       
     # Run unit testing
     - name: Run unit tests with pytest
