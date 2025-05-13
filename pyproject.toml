@@ -20,7 +20,7 @@ dependencies = []
 
 [project.optional-dependencies]
 cpu = [
-  "torch","polars","scanpy", "tqdm"
+  "torch","polars","scanpy", "tqdm", "pyarrow", "fastparquet"
 ]
 gpu = [
   "torch","polars[gpu]","scanpy", "tqdm"
@@ -59,3 +59,9 @@ conflicts = [
 
 [tool.hatch.version]
 path = "sctuner/__init__.py"
+
+[tool.hatch.build]
+exclude = [
+  "/docs",
+  "/tests",
+]

@@ -1,4 +1,8 @@
-# scTuner
+# `scTuner`
+
+[![PyPI version](https://badge.fury.io/py/sctuner.svg)](https://badge.fury.io/py/sctuner)
+[![CI/CD](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml)
+
 A repository to easily use or tune single cell models, such as variational autoencoders (VAEs), constructed from large single cell datasets. Additionally, these models can be fine-tuned with smaller datasets, which speeds up the downstream analysis of smaller datasets.
 
 ## Model availability

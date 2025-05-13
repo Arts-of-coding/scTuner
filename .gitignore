@@ -3,7 +3,8 @@ batchmergersctuner.py
 scalescbatchhvgfunction.py
 batchsplitterctuner.py
 importparquet.py
-*.h5ad
+/*.h5ad
+data/
 *.npy
 *.pt
 *.dat
@@ -16,7 +17,4 @@ sctuner.egg-info*
 finetuning_immune/
 pytestdata/*.parquet
 pytestdata/*.txt
-pytestdata/dataset_2_split_0.parquet
-pytestdata/joined_dataset.parquet
-pytestdata/joined_dataset_raw.parquet
-tests/test_pq_finetuning.py
+tests/pq_finetuning.py
