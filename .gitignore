@@ -12,3 +12,11 @@ sctuner_output*
 __pycache__
 dist*
 sctuner.egg-info*
+*coverage*
+finetuning_immune/
+pytestdata/*.parquet
+pytestdata/*.txt
+pytestdata/dataset_2_split_0.parquet
+pytestdata/joined_dataset.parquet
+pytestdata/joined_dataset_raw.parquet
+tests/test_pq_finetuning.py

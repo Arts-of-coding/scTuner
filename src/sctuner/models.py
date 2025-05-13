@@ -13,9 +13,10 @@ import numpy as np
 from sctuner.vae import VAE, loss_function, train
 
 # Inside model.SCVI.setup_anndata
-def setup_parquet(parquet_path: str, metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu"):
+def setup_parquet(parquet_path: str, feature_file_path: str , metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", finetuning: bool = False):
     ''' Docstring 
     device: choices in "cpu" (default) or "gpu" (cuda). If there is enough VRAM and the dataset is small enough suggest to use "gpu". If there is a good amount of RAM "cpu" should be selected.
+    finetuning: choices in True or False (default). If True, the model will be finetuned on the dataset and zero imputation for missing genes will be applied.
     '''
 
     cells = pl.scan_parquet(parquet_path, low_memory=True) #
@@ -41,14 +42,22 @@ def setup_parquet(parquet_path: str, metadata_columns: list = ["ID","sctuner_bat
 
     result = result.drop(metadata_columns)
 
-    
-    #result.write_parquet(f'test_polars_streaming.parquet', use_pyarrow= True)
-    print(result.head(3))
+    # Load in features
+    with open(feature_file_path, 'r') as f:
+        text = f.read()
+        features = eval(text)
 
-    # Perhaps save the list for the exact genes (or can use the earier)
-    # test scaling first?
-    #result = result.select((pl.all()-pl.all().min())/pl.all().max()-pl.all().min())
-    #print("scaling succesull")
+    # Add missing columns if there are any
+    if finetuning is True:
+        
+        for i in features:
+            if i not in result.columns:
+                result = result.with_columns(pl.lit(0).alias(i))
+
+    # Order the dataframe by the features
+    result = result.select(features)
+	
+    print(result.head(3))
 
     # Directly convert parquet to torch input
     result = result.to_torch()

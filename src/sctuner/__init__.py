@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # from .scalesc import hvg_batch_processing, extract_hvg_h5ad
 from .optimisers import AdEMAMix
