@@ -72,7 +72,7 @@ np.save("embeddings", embeddings)
 torch.save(model, "model_vae.pt")
 
 # Convert everything to a standard single-cell object (containing raw counts) for further downstream analysis
-adata, embeddings = sct.pqutils.parquet2anndata(f'{output_dir}/joined_dataset_raw.parquet', embeddings_path="embeddings_biosbtest2025.npy")
+adata, embeddings = sct.pqutils.parquet2anndata(f'{output_dir}/joined_dataset_raw.parquet', embeddings_path="embeddings.npy")
 adata
 ```
 
