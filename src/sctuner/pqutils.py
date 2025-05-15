@@ -1,23 +1,14 @@
 import polars as pl
 import scanpy as sc
-from torch.utils.data import DataLoader
 from tqdm import tqdm
-import math
 import torch
-from torch.optim import Optimizer
-import torch.nn as nn
-import torch.optim as optim
-from torch.distributions import Normal
-from sctuner.optimisers import AdEMAMix
 import numpy as np
-import random
 import os
-import anndata as ad
-import time
 import polars.selectors as cs
 import glob
 import shutil
 from memory_profiler import profile
+import contextlib
 torch.manual_seed(42)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -91,15 +82,11 @@ def pqconverter(dirs: list, feature_file_path: str, batch_size_genes: int = 100,
     print(len(features))
 
     # Remove any old directories if present
-    try:
+    with contextlib.suppress(FileNotFoundError):
         shutil.rmtree(f'{outputdir}joined_dataset_raw/')
-    except FileNotFoundError:
-        pass
 
-    try:
+    with contextlib.suppress(FileNotFoundError):
         shutil.rmtree(f'{outputdir}joined_dataset/')
-    except FileNotFoundError:
-        pass
 
     # Define polars engine based on gpu availability
     match device:
