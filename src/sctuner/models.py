@@ -1,16 +1,4 @@
 import polars as pl
-import scanpy as sc
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-import math
-import torch
-from torch.optim import Optimizer
-import torch.nn as nn
-import torch.optim as optim
-from torch.distributions import Normal
-from sctuner.optimisers import AdEMAMix
-import numpy as np
-from sctuner.vae import VAE, loss_function, train
 
 # Inside model.SCVI.setup_anndata
 def setup_parquet(parquet_path: str, feature_file_path: str , metadata_columns: list = ["ID","sctuner_batch"], device: str = "cpu", finetuning: bool = False):
@@ -82,7 +70,7 @@ def extract_embeddings(model, x, device: str = "gpu"):
         x = x.to(device)
         z_mean, z_log_var = model.encode(x)
 
-    except RuntimeError as e:
+    except RuntimeError:
         print("Overriding device to 'cpu' due to too few VRAM available on gpu")
         device = "cpu"
         x = x.to(device)
