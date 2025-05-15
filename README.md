@@ -80,6 +80,6 @@ adata
 ![training_plot](img/training_benchmark.png)
 
 ## Acknowledgements
-The exeptional documentation of scVI (https://github.com/scverse/scvi-tools) made constructing this package relatively straightforward. I recommend trying out their model, especially when dealing with medium sized datasets or after having performed iterative optimisations for your large dataset (e.g. having determined the top n genes to perform integration on).
+The exceptional documentation of scVI (https://github.com/scverse/scvi-tools) enabled relatively straightforward construction of this package. I recommend trying out their model, especially when dealing with medium sized datasets or after having performed iterative optimisations on large datasets (e.g. having determined the top n genes to perform integration on).
 
-The GPU-accelerated data processing pipeline wrapper in this package was made around ScaleSC (https://github.com/interactivereport/ScaleSC), feel free to check out their package. 
+The GPU-accelerated data processing pipeline wrapper in this package was made around ScaleSC (https://github.com/interactivereport/ScaleSC), feel free to check out their package.
