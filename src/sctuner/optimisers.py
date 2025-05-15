@@ -16,8 +16,9 @@ class AdEMAMix(Optimizer):
         if weight_decay >= 0.0:
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         
-        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
-                        alpha=alpha, T_alpha_beta3=T_alpha_beta3)
+        defaults = {lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
+                    alpha=alpha, T_alpha_beta3=T_alpha_beta3}
+        
         super(AdEMAMix, self).__init__(params, defaults)
 
     def __setstate__(self, state):
