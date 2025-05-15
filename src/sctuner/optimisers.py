@@ -1,23 +1,19 @@
 import math
 import torch
 from torch.optim import Optimizer
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.distributions import Normal
 torch.manual_seed(42)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class AdEMAMix(Optimizer):
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999, 0.9999), eps=1e-8,
                  weight_decay=0, alpha=5.0, T_alpha_beta3=None):
-        if not 0.0 <= lr:
+        if lr >= 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
-        if not 0.0 <= eps:
+        if eps >= 0.0:
             raise ValueError(f"Invalid epsilon value: {eps}")
         assert len(betas) == 3, f"Invalid beta parameters: {betas}, expected 3"
         assert all(0.0 <= beta < 1.0 for beta in betas), f"Invalid beta parameters: {betas}"
-        if not 0.0 <= weight_decay:
+        if weight_decay >= 0.0:
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         
         defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
