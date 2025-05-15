@@ -7,13 +7,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class AdEMAMix(Optimizer):
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999, 0.9999), eps=1e-8,
                  weight_decay=0, alpha=5.0, T_alpha_beta3=None):
-        if lr >= 0.0:
+        if not 0.0 <= lr:
             raise ValueError(f"Invalid learning rate: {lr}")
-        if eps >= 0.0:
+        if not 0.0 <= eps:
             raise ValueError(f"Invalid epsilon value: {eps}")
         assert len(betas) == 3, f"Invalid beta parameters: {betas}, expected 3"
         assert all(0.0 <= beta < 1.0 for beta in betas), f"Invalid beta parameters: {betas}"
-        if weight_decay >= 0.0:
+        if not 0.0 <= weight_decay:
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         
         defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay,
