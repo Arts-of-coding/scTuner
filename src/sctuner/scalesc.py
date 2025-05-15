@@ -60,15 +60,9 @@ def extract_hvg_h5ad(dirs: list, feature_file_path: str, join: str = "outer"):
 
             match join:
                 case "inner":
-                    if num >0:
-                        res=list(set(res).intersection(features))
-                    else:
-                        res = features
+                    res = list(set(res).intersection(features)) if num > 0 else features
                 case "outer":
-                    if num >0:
-                        res=list(set(res).union(features))
-                    else:
-                        res = features
+                    res = list(set(res).union(features)) if num > 0 else features
         
     res = random.sample(res, len(res))
 
