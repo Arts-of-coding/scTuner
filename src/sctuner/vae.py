@@ -1,15 +1,6 @@
-import polars as pl
-import scanpy as sc
-from torch.utils.data import DataLoader
 from tqdm import tqdm
-import math
-import torch
-from torch.optim import Optimizer
-
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.distributions import Normal
 torch.manual_seed(42)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from sctuner.optimisers import AdEMAMix
@@ -60,11 +51,9 @@ class VAE(nn.Module):
         x_hat = self.decode(z)
         return x_hat, mean, logvar
 
+# Define parameters for def train
 model = VAE().to(device)
-
-#optimizer = optim.Adam(model.parameters(), lr=1e-3)
 optimizer = AdEMAMix(model.parameters())
-
 
 def loss_function(x, x_hat, mean, log_var):
     reproduction_loss = nn.functional.binary_cross_entropy(x_hat, x, reduction='sum')
@@ -96,7 +85,5 @@ def train(model, optimizer, epochs, device, train_loader = None):
         train_loss = overall_loss/len(train_loader.dataset)
         i = int(train_loss)
         pbar.set_postfix({"Current loss VAE": i})
-    #tqdm.set_postfix({f"\tOverall rLoss: {overall_loss:.5f}current loss: {loss.item():.5f}"})
-        #print("\tEpoch", epoch + 1, f"\tOverall rLoss: {overall_loss:.5f}", f"current loss: {loss.item():.5f}")
         pass
     return overall_loss
