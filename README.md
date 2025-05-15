@@ -12,7 +12,7 @@ A repository to easily use or tune single cell models, such as variational autoe
 This repository contains its own (GPU-accelerated) VAE (constructed with PyTorch). Currently the AdEMAMix Optimiser is implemented from https://arxiv.org/abs/2409.03137.
 
 ## Installation and usage
-### GPU--accelerated processing pipeline powered by ScaleSC
+### GPU-accelerated processing pipeline powered by ScaleSC
 Installing scTuner on top of ScaleSC (needed for the GPU-accelerated) pipeline. First install ScaleSC as instructed (https://github.com/interactivereport/ScaleSC):
 ```
 $ conda activate scalesc
