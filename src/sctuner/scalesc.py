@@ -1,15 +1,9 @@
 # Testing scalesc on 2GB ram videocard with the 1mln dataset (3x 100k version)
-import scanpy as sc
-import numpy as np
-import pandas as pd
-import importlib
 import scalesc as ssc
 from tqdm import tqdm
 #from memory_profiler import profile
 import random
 import os
-import anndata as ad
-import time
 
 def hvg_batch_processing(dirs: list,top_batch_hvg: int = 1500, preliminary_filtering: bool = True):
     ''' Put function arguments here'''
@@ -34,7 +28,7 @@ def hvg_batch_processing(dirs: list,top_batch_hvg: int = 1500, preliminary_filte
 
         # hvg
         scalesc.highly_variable_genes(n_top_genes=top_batch_hvg) # Can do batch key here and just select + save afterwards...
-        list_hvgs = scalesc.adata.var[scalesc.adata.var['highly_variable'] == True]
+        list_hvgs = scalesc.adata.var[scalesc.adata.var['highly_variable']]
         list_hvgs
 
         # Save features
@@ -63,19 +57,18 @@ def extract_hvg_h5ad(dirs: list, feature_file_path: str, join: str = "outer"):
         with open(f"{_}features_scalesc.txt", 'r') as f:
             text = f.read()
             features = eval(text)
-            #features
-            #feature_dict[_] = features
-            # Can also try with case - match?
-            if join == "inner":
-                if num >0:
-                    res=list(set(res).intersection(features))
-                else:
-                    res = features
-            if join == "outer":
-                if num >0:
-                    res=list(set(res).union(features))
-                else:
-                    res = features
+
+            match join:
+                case "inner":
+                    if num >0:
+                        res=list(set(res).intersection(features))
+                    else:
+                        res = features
+                case "outer":
+                    if num >0:
+                        res=list(set(res).union(features))
+                    else:
+                        res = features
         
     res = random.sample(res, len(res))
 
