@@ -22,10 +22,10 @@ dependencies = []
 
 [project.optional-dependencies]
 cpu = [
-  "torch","polars","scanpy", "tqdm", "pyarrow", "fastparquet"
+  "torch","polars","scanpy", "tqdm", "pyarrow", "fastparquet", "memory-profiler"
 ]
 gpu = [
-  "torch","polars[gpu]","scanpy", "tqdm", "pyarrow", "fastparquet"
+  "torch","polars[gpu]","scanpy", "tqdm", "pyarrow", "fastparquet", "memory-profiler"
 ]
 
 [tool.uv.sources]
