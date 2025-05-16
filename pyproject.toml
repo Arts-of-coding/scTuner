@@ -12,6 +12,8 @@ exclude = ["*"]
 [project]
 name = "sctuner"
 version = "0.1.0"
+readme = "README.md"
+license = {file = "LICENSE"}
 authors = [
     { name = "Julian Arts (Arts-of-coding)", email = "mail@julianarts.nl" },
 ]
