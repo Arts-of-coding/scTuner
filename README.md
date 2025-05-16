@@ -2,6 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/sctuner.svg)](https://badge.fury.io/py/sctuner)
 [![CI/CD](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml)
+[![DOI](https://zenodo.org/badge/927813255.svg)](https://doi.org/10.5281/zenodo.15442205)
 
 A repository to easily use or tune single cell models, such as variational autoencoders (VAEs), constructed from large single cell datasets. Additionally, these models can be fine-tuned with smaller datasets, which speeds up the downstream analysis of smaller datasets. For (VAE) model training, 2x speed up can be seen on limited hardware and up to 6x on more advanced hardware (see benchmarking plot).
 
@@ -142,3 +143,6 @@ $ uv pip install sctuner[gpu] --torch-backend=cu126
 The exceptional documentation of scVI (https://github.com/scverse/scvi-tools) enabled relatively straightforward construction of this package. I recommend trying out their model, especially when dealing with medium sized datasets or after having performed iterative optimisations on large datasets (e.g. having determined the top n genes to perform integration on).
 
 The GPU-accelerated data processing pipeline wrapper in this package was made around ScaleSC (https://github.com/interactivereport/ScaleSC), feel free to check out their package.
+
+# How to cite
+When using this software package, please cite the accompanied DOI under "Citation" at https://doi.org/10.5281/zenodo.15442205
