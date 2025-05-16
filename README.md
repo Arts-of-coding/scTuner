@@ -3,10 +3,10 @@
 [![PyPI version](https://badge.fury.io/py/sctuner.svg)](https://badge.fury.io/py/sctuner)
 [![CI/CD](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Arts-of-coding/scTuner/actions/workflows/ci-cd.yml)
 
-A repository to easily use or tune single cell models, such as variational autoencoders (VAEs), constructed from large single cell datasets. Additionally, these models can be fine-tuned with smaller datasets, which speeds up the downstream analysis of smaller datasets.
+A repository to easily use or tune single cell models, such as variational autoencoders (VAEs), constructed from large single cell datasets. Additionally, these models can be fine-tuned with smaller datasets, which speeds up the downstream analysis of smaller datasets. For (VAE) model training, 2x speed up can be seen on limited hardware and up to 6x on more advanced hardware (see benchmarking plot).
 
 ## Schematic overview of how scTuner can be used
-![schematic_plot](img/scTuner_schematic.png)
+<img src="https://github.com/Arts-of-coding/scTuner/blob/develop/img/scTuner_schematic.png" width="400">
 
 ## Model availability
 This repository contains its own (GPU-accelerated with CUDA) VAE (constructed with PyTorch). Currently the AdEMAMix Optimiser is implemented from https://arxiv.org/abs/2409.03137.
@@ -17,7 +17,7 @@ Installing scTuner on top of ScaleSC (needed for the GPU-accelerated) pipeline. 
 ```
 $ conda activate scalesc
 (scalesc) $ pip install uv # greatly speeds up pip installation of scTuner
-(scalesc) $ uv pip install sctuner[gpu]
+(scalesc) $ uv pip install sctuner[gpu] --torch-backend=cu126
 ```
 Within this activated environment, scTuner's functions 'hvg_batch_processing' and 'extract_hvg_h5ad' can be run. This enables downstream parquet processing with Polars rapids.
 
@@ -78,8 +78,46 @@ adata, embeddings = sct.pqutils.parquet2anndata(f'{output_dir}/joined_dataset_ra
 adata
 ```
 
+### scTuner's finetuning constructed models
+It is possible to use previously constructed (large) models. These models (e.g. from 1 million PBMCs) can be used as a jumpstart when integrating smaller datasets, e.g. immune cells in a particular tissue. The API is very similar to training the model as described above, only by adding "finetuning = True" in sct.models.setup_parquet().
+```
+# Specifying the feature path used to construct the larger model
+feature_file_path = "features_scalesc_outer_joined.txt"
+
+# Model constructed from one of the previous training runs
+model = torch.load("model.pt", weights_only=False)
+
+# Specify the smaller dataset constructed with the GPU-accelerated pipeline & scTuner's parquet processing.
+path_parquet = "finetuning_immune/joined_dataset.parquet"
+
+result = sct.setup_parquet(parquet_path=path_parquet, feature_file_path=feature_file_path, finetuning=True)
+
+# Load in the dataset into PyTorch's DataLoader
+train_loader_train = DataLoader(result, batch_size=512, shuffle=True, pin_memory=True,num_workers=4)
+
+# Initialize the model and optimizer
+model = model.to(device)
+optim = optimizer_AdEMAMix
+
+# Train the model for max 10 epochs (because this is a pre-trained model)
+sct.vae.train(model = model, optimizer = optim, train_loader = train_loader_train, epochs=10, device=device)
+
+# Extract and save the embeddings to cpu
+embeddings = sct.models.extract_embeddings(model, result, device="cpu")
+
+# Save embeddings
+np.save(f"embeddings_finetuned", embeddings)
+
+# Save model
+torch.save(model, f"model_vae_finetuned.pt")
+
+# Convert everything to a standard single-cell object
+adata, embeddings = sct.pqutils.parquet2anndata("joined_dataset_raw.parquet", 
+                                                embeddings_path="embeddings_finetuned.npy")
+```
+
 ## Benchmarking training time against state-of-the-art (scVI) integration with scTuner's VAE
-![training_plot](img/training_benchmark.png)
+<img src="https://github.com/Arts-of-coding/scTuner/blob/develop/img/training_benchmark.png" width="500">
 
 ## Installing ScaleSC with scTuner
 ```
