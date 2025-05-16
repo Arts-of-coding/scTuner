@@ -11,19 +11,21 @@ exclude = ["*"]
 
 [project]
 name = "sctuner"
-version = "0.0.2"
+version = "0.1.0"
+readme = "README.md"
+license = {file = "LICENSE"}
 authors = [
-    { name = "Julian Arts", email = "mail@julianarts.nl" },
+    { name = "Julian Arts (Arts-of-coding)", email = "mail@julianarts.nl" },
 ]
 requires-python = ">=3.9"
 dependencies = []
 
 [project.optional-dependencies]
 cpu = [
-  "torch","polars","scanpy", "tqdm", "pyarrow", "fastparquet"
+  "torch","polars","scanpy", "tqdm", "pyarrow", "fastparquet", "memory-profiler"
 ]
 gpu = [
-  "torch","polars[gpu]","scanpy", "tqdm"
+  "torch","polars[gpu]","scanpy", "tqdm", "pyarrow", "fastparquet", "memory-profiler"
 ]
 
 [tool.uv.sources]

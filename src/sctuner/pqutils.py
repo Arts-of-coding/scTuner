@@ -282,13 +282,13 @@ class Parquetpipe:
     def setup_parquet_pipe(self, *args): # Can add configurable gpu_engine as well as possible second argument
         splitter_params = args[0]
         converter_params = args[1]
-        #merger_params = args[2]
+        merger_params = args[2]
         self.__dict__.update(**splitter_params)
         self.__dict__.update(**converter_params)
-        #self.__dict__.update(**merger_params)
+        self.__dict__.update(**merger_params)
 
         pqsplitter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **splitter_params)
         pqconverter(dirs = self.dirs, feature_file_path = self.feature_file_path, outputdir = self.outputdir, **converter_params)
-        #pqmerger(outputdir = self.outputdir) #, **merger_params
+        pqmerger(outputdir = self.outputdir, **merger_params)
 
         return
