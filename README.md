@@ -9,11 +9,11 @@ A repository to easily use or tune single cell models, such as variational autoe
 ![schematic_plot](img/scTuner_schematic.png)
 
 ## Model availability
-This repository contains its own (GPU-accelerated) VAE (constructed with PyTorch). Currently the AdEMAMix Optimiser is implemented from https://arxiv.org/abs/2409.03137.
+This repository contains its own (GPU-accelerated with CUDA) VAE (constructed with PyTorch). Currently the AdEMAMix Optimiser is implemented from https://arxiv.org/abs/2409.03137.
 
 ## Installation and usage
 ### GPU-accelerated processing pipeline powered by ScaleSC
-Installing scTuner on top of ScaleSC (needed for the GPU-accelerated) pipeline. First install ScaleSC as instructed (https://github.com/interactivereport/ScaleSC):
+Installing scTuner on top of ScaleSC (needed for the GPU-accelerated) pipeline. First install ScaleSC as instructed (see below or https://github.com/interactivereport/ScaleSC):
 ```
 $ conda activate scalesc
 (scalesc) $ pip install uv # greatly speeds up pip installation of scTuner
@@ -50,9 +50,11 @@ The remaining API was inspired by scVI for ease of use:
 import sctuner as sct
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Define the input parquet file (already log1p normalized)
+# Define the input parquet file & features (already log1p normalized)
 path_parquet = 'joined_dataset.parquet'
-result = sct.models.setup_parquet(parquet_path=path_parquet)
+feature_file = "features_scalesc_outer_joined.txt"
+
+result = sct.models.setup_parquet(parquet_path=path_parquet, feature_file_path=feature_file)
 
 # Load in the dataset into PyTorch's DataLoader
 train_loader_train = DataLoader(result, batch_size=512, shuffle=True, pin_memory=True, num_workers=4)
@@ -78,6 +80,25 @@ adata
 
 ## Benchmarking training time against state-of-the-art (scVI) integration with scTuner's VAE
 ![training_plot](img/training_benchmark.png)
+
+## Installing ScaleSC with scTuner
+```
+$ conda create -n scalesc_sctuner python=3.12.9
+$ conda activate scalesc_sctuner
+$ pip install uv git pynvjitlink-cu12 # Due to dependency issue with uv
+$ uv pip install \
+    --extra-index-url=https://pypi.nvidia.com \
+    "cudf-cu12==25.2.*" "dask-cudf-cu12==25.2.*" "cuml-cu12==25.2.*" \
+    "cugraph-cu12==25.2.*" "nx-cugraph-cu12==25.2.*" "cuspatial-cu12==25.2.*" \
+    "cuproj-cu12==25.2.*" "cuxfilter-cu12==25.2.*" "cucim-cu12==25.2.*" \
+    "pylibraft-cu12==25.2.*" "raft-dask-cu12==25.2.*" "cuvs-cu12==25.2.*" \
+    "nx-cugraph-cu12==25.2.*"
+$ uv pip install rapids-singlecell xgboost # Needed for ScaleSC HVG selection
+$ git clone https://github.com/interactivereport/scaleSC.git
+$ cd scaleSC
+$ uv pip install .       # Install the ScaleSC git repo
+$ uv pip install sctuner[gpu] --torch-backend=cu126
+```
 
 ## Acknowledgements
 The exceptional documentation of scVI (https://github.com/scverse/scvi-tools) enabled relatively straightforward construction of this package. I recommend trying out their model, especially when dealing with medium sized datasets or after having performed iterative optimisations on large datasets (e.g. having determined the top n genes to perform integration on).
